@@ -4,13 +4,14 @@ from Individual import Individual
 import random
 import math
 from pandas import DataFrame
-
+from feature_extractor import *
 import matplotlib.pyplot as plt
 
 class GP:
-    def __init__(self, filename):
-        original_image = Image.open(filename)
-
+    def __init__(self, content_image_name, style_image_name):
+        content_image = Image.open(content_image_name).convert("RGB")
+        self.style_image = Image.open(style_image_name).convert("RGB")
+        self.style_gram = gram_matrix(extract_feature(self.style_image))
         # davidson image 
         # self.target_image = original_image.resize((160,120))
 
@@ -21,7 +22,7 @@ class GP:
         # self.target_image = original_image.resize((176,203))
         
         # mona lisa twice as large (times 1.5)
-        self.target_image = original_image.resize((264,305))
+        self.target_image = content_image.resize((264,305))
 
         # mona lisa twice as large (times 2.5)
         # self.target_image = original_image.resize((440,508))
@@ -49,13 +50,15 @@ class GP:
 
         # initialize starting population
         for i in range(pop_size):
+            print(i)
             new_indiv = Individual(self.l, self.w)
 
-            new_indiv.get_fitness(self.target_image)
-
+            new_indiv.get_fitness(self.target_image, self.style_image, self.style_gram)
+            
             population.append(new_indiv)
 
         for i in range(epochs):
+            print(i)
             new_pop = []
 
             # estimate for fitness of fittest individual from current epoch's population 
@@ -187,10 +190,10 @@ class GP:
         # if blend_alpha is 0.0, a copy of the first image is returned. 
         # If blend_alpha is 1.0, a copy of the second image is returned.
         # use a random blend_alpha \in (0,1) 
-        child_image = Image.blend(ind1.image, ind2.image, blend_alpha)
+        child_image = Image.blend(ind1.image, ind2.image, blend_alpha).convert("RGB")
         child.image = child_image
         child.array = np.array(child_image)
-        child.get_fitness(self.target_image)
+        child.get_fitness(self.target_image, self.style_image, self.style_gram)
 
         # elitism 
         if child.fitness == min(ind1.fitness, ind2.fitness, child.fitness):
@@ -233,9 +236,9 @@ class GP:
             
         second = 1 - first
 
-        # Creates the 4 dimensional versions to perform the mutliplying across all color channels 
-        first = np.dstack([first,first,first,first])
-        second = np.dstack([second,second,second,second])
+        # Creates the 3 dimensional versions to perform the mutliplying across all color channels 
+        first = np.dstack([first,first,first])
+        second = np.dstack([second,second,second])
 
         # Multiply parent1 with first and multiply parent2 with second. Then simplay add them element wise and it should produce the crossover child.
 
@@ -246,10 +249,10 @@ class GP:
         
         child = Individual(self.l, self.w)
         
-        child.image = Image.fromarray(child_array.astype(np.uint8))
+        child.image = Image.fromarray(child_array.astype(np.uint8)).convert("RGB")
         child.array = child_array.astype(np.uint8)
         
-        child.get_fitness(self.target_image)
+        child.get_fitness(self.target_image, self.style_image, self.style_gram)
 
         # elitism 
         if child.fitness == min(ind1.fitness, ind2.fitness, child.fitness):
@@ -282,10 +285,10 @@ class GP:
         
         child = Individual(self.l, self.w)
         
-        child.image = Image.fromarray(child_array.astype(np.uint8))
+        child.image = Image.fromarray(child_array.astype(np.uint8)).convert("RGB")
         child.array = child_array.astype(np.uint8)
         
-        child.get_fitness(self.target_image)
+        child.get_fitness(self.target_image, self.style_image, self.style_gram)
         
         return child
 
@@ -322,7 +325,7 @@ class GP:
         child = Individual(ind.l, ind.w)
         child.image = img
         child.array = child.to_array(child.image)
-        child.get_fitness(self.target_image)
+        child.get_fitness(self.target_image, self.style_image, self.style_gram)
 
         return child 
 
@@ -348,17 +351,17 @@ class GP:
             ind.array[x][y][z] = ind.array[x][y][z] + random.randint(-10,10)
                 
         ind.image = self.to_image(ind.array)
-        ind.get_fitness(self.target_image)
+        ind.get_fitness(self.target_image, self.style_image, self.style_gram)
 
     def to_image(self, array):
-        return Image.fromarray(array)
+        return Image.fromarray(array).convert("RGB")
 
     def to_array(self, image):
         return np.array(image)
 
 # driver 
 def main():
-    gp = GP(r"mona_lisa.png")
+    gp = GP(r"dog.jpg", r"starry_night.jpg")
 
     fittest = gp.run_gp(100, 1500)
     plt.imshow(fittest.image)

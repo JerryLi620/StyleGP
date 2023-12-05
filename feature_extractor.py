@@ -40,15 +40,14 @@ def extract_feature(image):
 
 
 def gram_matrix(feature_map):
-    print(feature_map.size())
     (b, c, h, w) = feature_map.size()  # b=batch size, c=number of feature maps, h=height, w=width
     features = feature_map.view(b * c, h * w)  # Reshape the feature map
     G = torch.mm(features, features.t())  # Compute the Gram matrix
     # Normalize the values of the Gram matrix
     return G.div(b * c * h * w)
 
-image = Image.open("style_image.jpg").convert("RGB")
-feature_map = extract_feature(image)
-print(feature_map.size())
-gram = gram_matrix(feature_map)
-print(gram.size())
+# image = Image.open("style_image.jpg").convert("RGB")
+# feature_map = extract_feature(image)
+# print(feature_map.size())
+# gram = gram_matrix(feature_map)
+# print(gram.size())

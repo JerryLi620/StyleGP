@@ -3,6 +3,7 @@ from PIL import Image, ImageOps, ImageDraw, ImagePath
 from PIL import ImageDraw
 from IPython.display import display
 import colour
+from feature_extractor import *
 
 import matplotlib.pyplot as plt
 
@@ -28,7 +29,7 @@ class Individual:
         return "#"+''.join([random.choice('0123456789ABCDEF') for j in range(6)])
 
     def create_one_color(self):
-        self.image = Image.new(mode="RGBA", size=(self.l, self.w), color=self.rand_color())
+        self.image = Image.new(mode="RGB", size=(self.l, self.w), color=self.rand_color())
 
     def create_random_image_array(self):
 
@@ -38,7 +39,7 @@ class Individual:
 
         region = (self.l + self.w)//8
 
-        img = Image.new("RGBA", (self.l, self.w), self.rand_color())
+        img = Image.new("RGB", (self.l, self.w), self.rand_color())
 
         #number of points for each polygon
         for i in range(iterations):
@@ -106,10 +107,15 @@ class Individual:
 # Try this for later 
 # PIL.ImageChops.difference(image1, image2)[source]
 # Returns the absolute value of the pixel-by-pixel difference between the two images.
-    def get_fitness(self, target):
+    def get_fitness(self, target, style_image, style_gram):
 
-        self.fitness = np.mean(colour.difference.delta_e.delta_E_CIE1976(target, self.array))
+        content_loss = np.mean(colour.difference.delta_e.delta_E_CIE1976(target, self.array))
+        feature = extract_feature(self.image)
+        gram = gram_matrix(feature)
+        style_loss = torch.mean((style_gram - gram) ** 2)
 
+        total_loss = content_loss + style_loss
+        return total_loss
     def get_fitness_euclidean(self, target):
         diff_array = np.subtract(np.array(target), self.array)
         self.fitness = np.mean(np.absolute(diff_array))
