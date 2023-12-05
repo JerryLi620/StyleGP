@@ -17,6 +17,8 @@ class Individual:
         self.l = l
         self.w = w
         self.fitness = float('inf')
+        self.style_loss = float('inf')
+        self.content_loss = float('inf')
         self.array = None
         self.image = None
         coinflip = random.randint(1, 4)
@@ -107,15 +109,17 @@ class Individual:
 # Try this for later 
 # PIL.ImageChops.difference(image1, image2)[source]
 # Returns the absolute value of the pixel-by-pixel difference between the two images.
-    def get_fitness(self, target, style_image, style_gram):
+    def get_fitness(self, target, style_gram):
 
-        content_loss = np.mean(colour.difference.delta_e.delta_E_CIE1976(target, self.array))
+        self.content_loss = np.mean(colour.difference.delta_e.delta_E_CIE1976(target, self.array))
         feature = extract_feature(self.image)
         gram = gram_matrix(feature)
-        style_loss = torch.mean((style_gram - gram) ** 2)
-
-        total_loss = content_loss + style_loss
+        self.style_loss = torch.mean(np.abs(style_gram - gram))*1e5
+        # print(style_loss, content_loss)
+        total_loss = self.content_loss + self.style_loss
+        self.fitness = total_loss
         return total_loss
+    
     def get_fitness_euclidean(self, target):
         diff_array = np.subtract(np.array(target), self.array)
         self.fitness = np.mean(np.absolute(diff_array))

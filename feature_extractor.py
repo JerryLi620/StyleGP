@@ -5,16 +5,21 @@ from PIL import Image
 from torchvision.models.vgg import VGG16_Weights
 
 
+# Load the pretrained VGG16 model
+model = models.vgg16(weights=VGG16_Weights.DEFAULT).features
+
+# Freeze all the layers of the model
+for param in model.parameters():
+    param.requires_grad = False
+
+# Set the model to evaluation mode
+model.eval()
+
+# Move the model to GPU if available
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model.to(device)
+
 def extract_feature(image):
-    # Load the pretrained VGG16 model
-    model = models.vgg16(weights=VGG16_Weights.DEFAULT)
-
-    # We only need the convolutional layers, not the fully connected layers
-    model = model.features
-
-    # Ensure the model is in evaluation mode
-    model.eval()
-
     # Define the image transformations
     transform = transforms.Compose([
         transforms.Resize(256),
@@ -24,18 +29,12 @@ def extract_feature(image):
     ])
 
     # Load and transform the image
-    image = transform(image).unsqueeze(0)  # Add batch dimension
-
-    # Check if GPU is available and if so, use it
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    image = image.to(device)
-    model = model.to(device)
+    image = transform(image).unsqueeze(0).to(device)
 
     # Extract feature map
     with torch.no_grad():
         feature_maps = model(image)
 
-    
     return feature_maps
 
 

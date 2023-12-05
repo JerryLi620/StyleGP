@@ -44,33 +44,32 @@ class GP:
         fittest -- individual with the best fitness from final generation
         """
 
-        data = {'epoch':[], 'fitness_estimate':[], 'crossover_used':[], 'pop_gen_used':[], 'im_size':[]}
+        data = {'epoch':[], 'fitness_content_estimate':[], 'fitness_style_estimate':[], 'crossover_used':[], 'pop_gen_used':[], 'im_size':[]}
         
         population = []
 
         # initialize starting population
         for i in range(pop_size):
-            print(i)
             new_indiv = Individual(self.l, self.w)
 
-            new_indiv.get_fitness(self.target_image, self.style_image, self.style_gram)
+            new_indiv.get_fitness(self.target_image, self.style_gram)
             
             population.append(new_indiv)
 
         for i in range(epochs):
-            print(i)
+            print("epoch:", i)
             new_pop = []
 
             # estimate for fitness of fittest individual from current epoch's population 
-            fittest_estimate = float('inf')
-
+            fittest_style_estimate = float('inf')
+            fittest_content_estimate = float('inf')
             # populate our new population
             while len(new_pop) < len(population):
                 # select parents for crossover
                 parent_one = self.tournament_select(population)
                 parent_two = self.tournament_select(population)
-
-                fittest_estimate = min(parent_one.fitness, parent_two.fitness, fittest_estimate)
+                fittest_style_estimate = min(parent_one.style_loss, parent_two.style_loss, fittest_style_estimate)
+                fittest_content_estimate = min(parent_one.content_loss, parent_two.content_loss, fittest_content_estimate)
 
                 # probabilistically determine how child of both parents is created 
                 rand = random.uniform(0, 1)
@@ -107,19 +106,21 @@ class GP:
             population = new_pop
             
             # fitness data recording 
-            if i % 100 == 0 or i == epochs - 1:
+            if i % 10 == 0 or i == epochs - 1:
                 data['epoch'].append(i)
-                data['fitness_estimate'].append(fittest_estimate)
+                data['fitness_content_estimate'].append(fittest_content_estimate)
+                data['fitness_style_estimate'].append(fittest_style_estimate)
                 data['crossover_used'].append("crossover_1")
                 data['pop_gen_used'].append("random_image_array_1")
                 data['im_size'].append("(" + str(self.w) + "," + str(self.l) + ")")
             
             # save images on interval to see progress  
             # if i % 1000 == 0 or i == epochs - 1:
-            if i % 100 == 0 or i == epochs - 1:
+            if i % 10 == 0 or i == epochs - 1:
 
                 print("Most fit individual in epoch " + str(i) +
-                    " has fitness: " + str(fittest_estimate))
+                    " has content fitness: " + str(fittest_content_estimate) + 
+                    " and style fitness: " + str(fittest_style_estimate))
                 
                 population.sort(key=lambda ind: ind.fitness)
                 fittest = population[0]
@@ -193,7 +194,7 @@ class GP:
         child_image = Image.blend(ind1.image, ind2.image, blend_alpha).convert("RGB")
         child.image = child_image
         child.array = np.array(child_image)
-        child.get_fitness(self.target_image, self.style_image, self.style_gram)
+        child.get_fitness(self.target_image, self.style_gram)
 
         # elitism 
         if child.fitness == min(ind1.fitness, ind2.fitness, child.fitness):
@@ -252,7 +253,7 @@ class GP:
         child.image = Image.fromarray(child_array.astype(np.uint8)).convert("RGB")
         child.array = child_array.astype(np.uint8)
         
-        child.get_fitness(self.target_image, self.style_image, self.style_gram)
+        child.get_fitness(self.target_image, self.style_gram)
 
         # elitism 
         if child.fitness == min(ind1.fitness, ind2.fitness, child.fitness):
@@ -288,7 +289,7 @@ class GP:
         child.image = Image.fromarray(child_array.astype(np.uint8)).convert("RGB")
         child.array = child_array.astype(np.uint8)
         
-        child.get_fitness(self.target_image, self.style_image, self.style_gram)
+        child.get_fitness(self.target_image, self.style_gram)
         
         return child
 
@@ -325,7 +326,7 @@ class GP:
         child = Individual(ind.l, ind.w)
         child.image = img
         child.array = child.to_array(child.image)
-        child.get_fitness(self.target_image, self.style_image, self.style_gram)
+        child.get_fitness(self.target_image, self.style_gram)
 
         return child 
 
@@ -351,7 +352,7 @@ class GP:
             ind.array[x][y][z] = ind.array[x][y][z] + random.randint(-10,10)
                 
         ind.image = self.to_image(ind.array)
-        ind.get_fitness(self.target_image, self.style_image, self.style_gram)
+        ind.get_fitness(self.target_image, self.style_gram)
 
     def to_image(self, array):
         return Image.fromarray(array).convert("RGB")
@@ -363,7 +364,7 @@ class GP:
 def main():
     gp = GP(r"dog.jpg", r"starry_night.jpg")
 
-    fittest = gp.run_gp(100, 1500)
+    fittest = gp.run_gp(100, 100)
     plt.imshow(fittest.image)
     plt.show()
 
