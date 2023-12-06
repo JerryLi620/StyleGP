@@ -114,7 +114,7 @@ class Individual:
         self.content_loss = np.mean(colour.difference.delta_e.delta_E_CIE1976(target, self.array))
         feature = extract_feature(self.image)
         gram = gram_matrix(feature)
-        self.style_loss = torch.mean(np.abs(style_gram - gram))*1e5
+        self.style_loss = torch.mean(np.abs(style_gram - gram))*1e6
         # print(style_loss, content_loss)
         total_loss = self.content_loss + self.style_loss
         self.fitness = total_loss

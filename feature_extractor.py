@@ -3,7 +3,7 @@ import torchvision.models as models
 import torchvision.transforms as transforms
 from PIL import Image
 from torchvision.models.vgg import VGG16_Weights
-
+import numpy as np
 
 # Load the pretrained VGG16 model
 model = models.vgg16(weights=VGG16_Weights.DEFAULT).features
@@ -45,8 +45,12 @@ def gram_matrix(feature_map):
     # Normalize the values of the Gram matrix
     return G.div(b * c * h * w)
 
-# image = Image.open("style_image.jpg").convert("RGB")
-# feature_map = extract_feature(image)
+# style_image = Image.open("generated_style.jpg").convert("RGB")
+# style_image2 = Image.open("dog.jpg").convert("RGB")
+# feature_map = extract_feature(style_image)
+# feature_map2 = extract_feature(style_image2)
 # print(feature_map.size())
 # gram = gram_matrix(feature_map)
+# gram2 = gram_matrix(feature_map2)
 # print(gram.size())
+# print(torch.mean(np.abs(gram - gram2))*1e6)

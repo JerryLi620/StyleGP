@@ -22,7 +22,7 @@ class GP:
         # self.target_image = original_image.resize((176,203))
         
         # mona lisa twice as large (times 1.5)
-        self.target_image = content_image.resize((264,305))
+        self.target_image = content_image.resize((256,256))
 
         # mona lisa twice as large (times 2.5)
         # self.target_image = original_image.resize((440,508))
@@ -106,7 +106,7 @@ class GP:
             population = new_pop
             
             # fitness data recording 
-            if i % 10 == 0 or i == epochs - 1:
+            if i % 100 == 0 or i == epochs - 1:
                 data['epoch'].append(i)
                 data['fitness_content_estimate'].append(fittest_content_estimate)
                 data['fitness_style_estimate'].append(fittest_style_estimate)
@@ -362,9 +362,9 @@ class GP:
 
 # driver 
 def main():
-    gp = GP(r"dog.jpg", r"starry_night.jpg")
+    gp = GP(r"dog.jpg", r"generated_style.jpg")
 
-    fittest = gp.run_gp(100, 100)
+    fittest = gp.run_gp(100, 1000)
     plt.imshow(fittest.image)
     plt.show()
 
