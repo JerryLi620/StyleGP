@@ -5,6 +5,7 @@ import random
 import math
 from pandas import DataFrame
 from feature_extractor import *
+from content_extractor import *
 import matplotlib.pyplot as plt
 
 class GP:
@@ -22,8 +23,8 @@ class GP:
         # self.target_image = original_image.resize((176,203))
         
         # mona lisa twice as large (times 1.5)
-        self.target_image = content_image.resize((256,256))
-
+        self.target_image = content_image.resize((256, 256))
+        self.target_content = extract_content(self.target_image)
         # mona lisa twice as large (times 2.5)
         # self.target_image = original_image.resize((440,508))
 
@@ -52,7 +53,7 @@ class GP:
         for i in range(pop_size):
             new_indiv = Individual(self.l, self.w)
 
-            new_indiv.get_fitness(self.target_image, self.style_gram)
+            new_indiv.get_fitness(self.target_content, self.style_gram)
             
             population.append(new_indiv)
 
@@ -106,7 +107,7 @@ class GP:
             population = new_pop
             
             # fitness data recording 
-            if i % 100 == 0 or i == epochs - 1:
+            if i % 10 == 0 or i == epochs - 1:
                 data['epoch'].append(i)
                 data['fitness_content_estimate'].append(fittest_content_estimate)
                 data['fitness_style_estimate'].append(fittest_style_estimate)
@@ -194,7 +195,7 @@ class GP:
         child_image = Image.blend(ind1.image, ind2.image, blend_alpha).convert("RGB")
         child.image = child_image
         child.array = np.array(child_image)
-        child.get_fitness(self.target_image, self.style_gram)
+        child.get_fitness(self.target_content, self.style_gram)
 
         # elitism 
         if child.fitness == min(ind1.fitness, ind2.fitness, child.fitness):
@@ -253,7 +254,7 @@ class GP:
         child.image = Image.fromarray(child_array.astype(np.uint8)).convert("RGB")
         child.array = child_array.astype(np.uint8)
         
-        child.get_fitness(self.target_image, self.style_gram)
+        child.get_fitness(self.target_content, self.style_gram)
 
         # elitism 
         if child.fitness == min(ind1.fitness, ind2.fitness, child.fitness):
@@ -289,7 +290,7 @@ class GP:
         child.image = Image.fromarray(child_array.astype(np.uint8)).convert("RGB")
         child.array = child_array.astype(np.uint8)
         
-        child.get_fitness(self.target_image, self.style_gram)
+        child.get_fitness(self.target_content, self.style_gram)
         
         return child
 
@@ -326,7 +327,7 @@ class GP:
         child = Individual(ind.l, ind.w)
         child.image = img
         child.array = child.to_array(child.image)
-        child.get_fitness(self.target_image, self.style_gram)
+        child.get_fitness(self.target_content, self.style_gram)
 
         return child 
 
@@ -352,7 +353,7 @@ class GP:
             ind.array[x][y][z] = ind.array[x][y][z] + random.randint(-10,10)
                 
         ind.image = self.to_image(ind.array)
-        ind.get_fitness(self.target_image, self.style_gram)
+        ind.get_fitness(self.target_content, self.style_gram)
 
     def to_image(self, array):
         return Image.fromarray(array).convert("RGB")

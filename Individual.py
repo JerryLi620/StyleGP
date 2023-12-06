@@ -4,7 +4,7 @@ from PIL import ImageDraw
 from IPython.display import display
 import colour
 from feature_extractor import *
-
+from content_extractor import *
 import matplotlib.pyplot as plt
 
 import random
@@ -109,12 +109,12 @@ class Individual:
 # Try this for later 
 # PIL.ImageChops.difference(image1, image2)[source]
 # Returns the absolute value of the pixel-by-pixel difference between the two images.
-    def get_fitness(self, target, style_gram):
-
-        self.content_loss = np.mean(colour.difference.delta_e.delta_E_CIE1976(target, self.array))
+    def get_fitness(self, target_content, style_gram):
+        content = extract_content(self.image)
+        self.content_loss = torch.mean(np.abs(target_content - content))
         feature = extract_feature(self.image)
         gram = gram_matrix(feature)
-        self.style_loss = torch.mean(np.abs(style_gram - gram))*1e6
+        self.style_loss = torch.mean(np.abs(style_gram - gram))
         # print(style_loss, content_loss)
         total_loss = self.content_loss + self.style_loss
         self.fitness = total_loss
