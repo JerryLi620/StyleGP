@@ -363,7 +363,7 @@ class GP:
 
 # driver 
 def main():
-    gp = GP(r"dog.jpg", r"generated_style.jpg")
+    gp = GP(r"dog.jpg", r"starry_night.jpg")
 
     fittest = gp.run_gp(100, 1000)
     plt.imshow(fittest.image)
