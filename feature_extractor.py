@@ -2,11 +2,15 @@ import torch
 import torchvision.models as models
 import torchvision.transforms as transforms
 from PIL import Image
-from torchvision.models.vgg import VGG16_Weights
+from torchvision.models.vgg import vgg16_bn
 import numpy as np
 
-# Load the pretrained VGG16 model
-model = models.vgg16(weights=VGG16_Weights.DEFAULT).features
+# Load the pretrained VGG16 model with batch normalization
+model = models.vgg16_bn(pretrained=True)
+
+# Modify the model to return feature maps from a specific convolutional layer
+# For example, the output of the fifth convolutional block
+model.features = torch.nn.Sequential(*list(model.features.children())[:])
 
 # Freeze all the layers of the model
 for param in model.parameters():
