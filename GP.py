@@ -7,6 +7,7 @@ from pandas import DataFrame
 from feature_extractor import *
 from content_extractor import *
 import matplotlib.pyplot as plt
+import logging
 
 class GP:
     def __init__(self, content_image_name, style_image_name):
@@ -46,7 +47,7 @@ class GP:
         """
 
         data = {'epoch':[], 'fitness_content_estimate':[], 'fitness_style_estimate':[], 'crossover_used':[], 'pop_gen_used':[], 'im_size':[]}
-        
+        logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
         population = []
 
         # initialize starting population
@@ -58,7 +59,7 @@ class GP:
             population.append(new_indiv)
 
         for i in range(epochs):
-            print("epoch:", i)
+            logging.info("epoch: %s", i)
             new_pop = []
 
             # estimate for fitness of fittest individual from current epoch's population 
@@ -118,10 +119,7 @@ class GP:
             # save images on interval to see progress  
             # if i % 1000 == 0 or i == epochs - 1:
             if i % 10 == 0 or i == epochs - 1:
-
-                print("Most fit individual in epoch " + str(i) +
-                    " has content fitness: " + str(fittest_content_estimate) + 
-                    " and style fitness: " + str(fittest_style_estimate))
+                logging.info("Most fit individual in epoch %s has content fitness: %s and style fitness: %s", i, fittest_content_estimate, fittest_style_estimate)
                 
                 population.sort(key=lambda ind: ind.fitness)
                 fittest = population[0]
