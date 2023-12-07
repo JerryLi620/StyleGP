@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/home/DAVIDSON/dolin/Workspace/DRI1/CSC370/StyleGP/GP.py", line 3, in <module>
+    from Individual import Individual
+  File "/home/DAVIDSON/dolin/Workspace/DRI1/CSC370/StyleGP/Individual.py", line 6, in <module>
+    from feature_extractor import *
+  File "/home/DAVIDSON/dolin/Workspace/DRI1/CSC370/StyleGP/feature_extractor.py", line 5, in <module>
+    from torchvision.models.vgg import VGG16_Weights
+ImportError: cannot import name 'VGG16_Weights' from 'torchvision.models.vgg' (/opt/conda/envs/common/lib/python3.8/site-packages/torchvision/models/vgg.py)
