@@ -19,7 +19,7 @@ model.eval()
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.to(device)
 
-def extract_feature(image):
+def extract_feature(image, layer_indices=[0, 5, 10, 17]):
     # Define the image transformations
     transform = transforms.Compose([
         transforms.Resize(256),
@@ -28,27 +28,33 @@ def extract_feature(image):
 
     # Load and transform the image
     image = transform(image).unsqueeze(0).to(device)
-
-    # Extract feature map
+    # Extract feature maps
+    feature_maps = []
     with torch.no_grad():
-        feature_maps = model(image)
-
+        for i, layer in enumerate(model.children()):
+            image = layer(image)
+            if i in layer_indices:
+                feature_maps.append(image)
     return feature_maps
 
 
-def gram_matrix(feature_map):
-    (b, c, h, w) = feature_map.size()  # b=batch size, c=number of feature maps, h=height, w=width
-    features = feature_map.view(b * c, h * w)  # Reshape the feature map
-    G = torch.mm(features, features.t())  # Compute the Gram matrix
-    # Normalize the values of the Gram matrix
-    return G.div(b * c * h * w)
+def gram_matrix(feature_maps):
+    gram_matrices = []
+    for feature_map in feature_maps:
+        (b, c, h, w) = feature_map.size()  # b=batch size, c=number of feature maps, h=height, w=width
+        features = feature_map.view(b * c, h * w)  # Reshape the feature map
+        G = torch.mm(features, features.t())  # Compute the Gram matrix
+        gram_matrices.append(G.div(b * c * h * w))  # Normalize the Gram matrix
+
+    return gram_matrices
+
 
 # style_image = Image.open("generated_style.jpg").convert("RGB")
 # style_image2 = Image.open("dog.jpg").convert("RGB")
 # feature_map = extract_feature(style_image)
 # feature_map2 = extract_feature(style_image2)
-# print(feature_map.size())
+# # print(feature_map[0].size())
 # gram = gram_matrix(feature_map)
 # gram2 = gram_matrix(feature_map2)
-# print(gram.size())
-# print(torch.mean(np.abs(gram - gram2))*1e6)
+# print(gram[0].size())
+# # print(torch.mean(np.abs(gram - gram2))*1e6)
