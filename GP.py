@@ -107,7 +107,7 @@ class GP:
             population = new_pop
             
             # fitness data recording 
-            if i % 100 == 0 or i == epochs - 1:
+            if i % 1 == 0 or i == epochs - 1:
                 data['epoch'].append(i)
                 data['fitness_content_estimate'].append(fittest_content_estimate)
                 data['fitness_style_estimate'].append(fittest_style_estimate)
@@ -116,7 +116,7 @@ class GP:
                 data['im_size'].append("(" + str(self.w) + "," + str(self.l) + ")")
             
             # save images on interval to see progress  
-            if i % 100 == 0 or i == epochs - 1:
+            if i % 1 == 0 or i == epochs - 1:
 
                 print("Most fit individual in epoch " + str(i) +
                     " has content fitness: " + str(fittest_content_estimate) + 

@@ -56,5 +56,7 @@ def gram_matrix(feature_maps):
 # # print(feature_map[0].size())
 # gram = gram_matrix(feature_map)
 # gram2 = gram_matrix(feature_map2)
-# print(gram[0].size())
-# # print(torch.mean(np.abs(gram - gram2))*1e6)
+# style_loss = 0
+# for i in range(len(gram)):
+#     print(torch.mean(np.abs(gram2[i] - gram[i]))* 1e5)
+#     style_loss += torch.mean(np.abs(gram2[i] - gram[i]))* 1e5

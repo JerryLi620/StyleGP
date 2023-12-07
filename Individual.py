@@ -114,8 +114,9 @@ class Individual:
         self.content_loss = torch.mean(np.abs(target_content - content))
         feature = extract_feature(self.image)
         gram = gram_matrix(feature)
+        self.style_loss = 0
         for i in range(len(gram)):
-            self.style_loss += torch.mean(np.abs(style_gram[i] - gram[i]))* 1e5
+            self.style_loss += torch.mean(np.abs(style_gram[i] - gram[i]))* 1e3
         # print(style_loss, content_loss)
         total_loss = self.content_loss + self.style_loss 
         self.fitness = total_loss
